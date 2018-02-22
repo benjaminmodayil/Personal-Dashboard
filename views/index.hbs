@@ -1,0 +1,32 @@
+<h1>{{title}}</h1>
+{{!-- top level: {{@notes}} top level: {{@todos}} --}}
+<form action="POST">
+  <input type="text">
+  <button>todo +</button>
+</form>
+
+<form action="POST">
+  <textarea type="text"></textarea>
+  <button>note +</button>
+</form>
+
+<h2>{{section_title_1}}</h2>
+<ul class="list-todos">
+  {{#each todos}}
+  <li class="row" data-id="{{_id}}">{{title}}
+
+    <button class="list-todos__delete">-</button>
+  </li>
+  {{/each}}
+</ul>
+
+{{!--
+<h2>{{section_title_2}}</h2>
+<ul>
+  {{#each notes}}
+  <li class="row" data-id="{{_id}}">{{title}}
+
+    <button>-</button>
+  </li>
+  {{/each}}
+</ul> --}}

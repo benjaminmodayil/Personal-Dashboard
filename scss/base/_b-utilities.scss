@@ -1,0 +1,156 @@
+$smallWidth: 380;
+$wideWidth: 1000;
+
+@mixin clearfix {
+  &:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+.clearfix {
+  @include clearfix;
+}
+
+.screenreader-only {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.screenreader-only--with-space {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  width: 1px;
+}
+
+.desktop-only {
+  display: none !important;
+}
+
+.mobile-only {
+  display: none !important;
+}
+
+// if using tailwind.css, delete the bottom onwards
+.wrapper {
+  @include clearfix;
+
+  padding-left: 20px;
+  padding-right: 20px;
+
+  .wrapper {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &.wrapper-1200 {
+    max-width: 1200px;
+  }
+
+  &.wrapper-500 {
+    max-width: 500px;
+  }
+  // setup wrapper widths as an array then setup a forEach function to add onto here
+}
+
+// setup wrapper widths as an array then setup a forEach function to add onto here
+// .container--
+.m-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// loops to create padding/margin sizes based on array above
+
+.block {
+  display: block;
+}
+
+.flex {
+  display: block;
+}
+
+// margin
+$spacings: 'auto', '8', '14', '16', '24', '28', '32', '48', '64', '80', '96';
+
+@each $spacing in $spacings {
+  .m-top-#{$spacing} {
+    margin-top: #{$spacing}px;
+  }
+
+  .m-bottom-#{$spacing} {
+    margin-bottom: #{$spacing}px;
+  }
+
+  .m-left-#{$spacing} {
+    margin-left: #{$spacing}px;
+  }
+
+  .m-right-#{$spacing} {
+    margin-right: #{$spacing}px;
+  }
+
+  .m-y-#{$spacing} {
+    margin-top: #{$spacing}px;
+    margin-bottom: #{$spacing}px;
+  }
+
+  .m-x-#{$spacing} {
+    margin-left: #{$spacing}px;
+    margin-right: #{$spacing}px;
+  }
+
+  .m-#{$spacing} {
+    margin: #{$spacing}px;
+  }
+
+  // padding
+  .p-top-#{$spacing} {
+    padding-top: #{$spacing}px;
+  }
+
+  .p-bottom-#{$spacing} {
+    padding-bottom: #{$spacing}px;
+  }
+
+  .p-left-#{$spacing} {
+    padding-left: #{$spacing}px;
+  }
+
+  .p-right-#{$spacing} {
+    padding-right: #{$spacing}px;
+  }
+
+  .p-y-#{$spacing} {
+    padding-top: #{$spacing}px;
+    padding-bottom: #{$spacing}px;
+  }
+
+  .p-x-#{$spacing} {
+    padding-left: #{$spacing}px;
+    padding-right: #{$spacing}px;
+  }
+
+  .p-#{$spacing} {
+    padding: #{$spacing}px;
+  }
+}
+
+.float-right {
+  float: right;
+}
+
+.float-left {
+  float: left;
+}

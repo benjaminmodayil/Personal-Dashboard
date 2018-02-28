@@ -1,0 +1,34 @@
+@mixin variable($property, $variable, $fallback) {
+  #{$property}: $fallback;
+  #{$property}: var($variable);
+}
+
+@function color($key) {
+  @return map-get($colors, '#{ $key }');
+}
+
+$colors: (
+  'transparent': transparent,
+  'black': lighten(#292929, 2%),
+  'white': #ffffff,
+  'text': #292929,
+  'link': darken(#ff545a, 20%),
+  'red': darken(#ff545a, 20%),
+  'blue': #2b3947
+);
+
+:root {
+  @each $color, $variableColor in $colors {
+    --#{$color}: #{$variableColor};
+  }
+}
+
+@each $color, $classColor in $colors {
+  .text-#{$color} {
+    color: #{$classColor};
+  }
+
+  .bg-#{$color} {
+    background-color: #{$classColor};
+  }
+}

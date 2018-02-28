@@ -39,9 +39,11 @@ let collector = {}
 let findTodos = new Promise(function(resolve, reject) {
   resolve(
     Todo.find()
+      .sort({ created: -1 })
       .then(items => {
         collector.todos = items
         app.locals.todos = () => items
+        console.log('finding todos')
         return items
       })
       .catch(err => {
@@ -77,7 +79,6 @@ let taskLoad = new Promise(function(resolve) {
 
 app.get('/api/everything', (req, res) => {
   Promise.all([findTodos, findNotes]).then(collector => {
-    console.log(collector)
     res.status(200).json({
       todos: collector[0],
       notes: collector[1]
@@ -86,13 +87,60 @@ app.get('/api/everything', (req, res) => {
 })
 
 app.get('/', (req, res) => {
-  res.render('index', {
-    title: 'Dashboard',
-    section_title_1: 'Todos',
-    section_title_2: 'Notes',
-    todos: collector.todos,
-    notes: collector.notes
-  })
+  Todo.find()
+    .sort({ created: -1 })
+    .then(items => {
+      collector.todos = items
+      app.locals.todos = () => items
+      console.log('finding todos')
+      return items
+    })
+    .then(items => {
+      res.render('index', {
+        title: 'Dashboard',
+        section_title_1: 'Todos',
+        section_title_2: 'Notes',
+        todos: items
+        // notes: collector.notes
+      })
+    })
+    .catch(err => {
+      console.error(err)
+      res.status(500).json({ error: 'something went wrong' })
+    })
+})
+
+app.get('/todos', (req, res) => {
+  Todo.find()
+    .sort({ created: -1 })
+    .then(items => {
+      collector.todos = items
+      app.locals.todos = () => items
+      console.log('finding todos')
+      return items
+    })
+    .then(items => {
+      res.status(200).json({
+        todos: items
+      })
+    })
+    .catch(err => {
+      console.error(err)
+      res.status(500).json({ error: 'something went wrong' })
+    })
+})
+
+app.get('/todos/:id', (req, res) => {
+  Todo.findById(`${req.params.id}`)
+    .then(item => {
+      res.status(200).json({
+        todos: item
+      })
+    })
+    .catch(err => {
+      console.error(err)
+      res.status(500).json({ error: 'something went wrong' })
+    })
 })
 
 app.post('/todos', (req, res) => {
@@ -111,9 +159,14 @@ app.post('/todos', (req, res) => {
       title: req.body.title,
       content: req.body.content,
       due: req.body.due,
+      tag: req.body.tag,
       status: req.body.status
     })
-      .then(todo => res.status(201).json(todo))
+      .then(todo => {
+        console.log(todo)
+        res.status(201)
+        res.json(todo)
+      })
       .catch(err => {
         console.error(err)
         res.status(500).json({ error: 'Something went wrong.' })
@@ -131,11 +184,13 @@ app.delete('/todos/:id', (req, res) => {
       res.status(500).json({ error: 'Something went wrong. 😢' })
     })
 })
+
 app.put('/todos/:id', (req, res) => {
   if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     res.status(400).json({
       error: 'Request path id and request body id values must match.'
     })
+    return
   }
 
   const updated = {}

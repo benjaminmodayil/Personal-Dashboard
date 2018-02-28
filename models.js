@@ -8,7 +8,8 @@ const todoSchema = mongoose.Schema({
   content: { type: String },
   created: { type: Date, default: Date.now },
   due: { type: Date },
-  status: { type: Boolean, default: false }
+  status: { type: Boolean, default: false },
+  tag: { type: String, default: 'inbox' }
 })
 
 const notesSchema = mongoose.Schema({

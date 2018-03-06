@@ -1,16 +1,17 @@
-const todoList = document.querySelector('.list-todos')
+let todoList, deleteButtons, todoForm, todoTitles, todoContents, details
 
-const deleteButtons = document.querySelectorAll('.list-todos__delete')
-const todoForm = document.querySelector('.todo-form')
-const todoTitles = document.querySelectorAll('.list-todos__title')
-const todoContents = document.querySelectorAll('.list-todos__content')
+todoList = document.querySelector('.list-todos')
+deleteButtons = document.querySelectorAll('.list-todos__delete')
+todoForm = document.querySelector('.todo-form')
+todoTitles = document.querySelectorAll('.list-todos__title')
+todoContents = document.querySelectorAll('.list-todos__content')
+details = document.querySelectorAll('details')
 
-let todoTemplate = (identification, title, content) => {
+let todoTemplate = (id, title, content) => {
   let todoBody, todoTemplate, todoTitle, todoDelete, directions, detail
 
   todoBody = document.createElement('li')
-  todoBody.dataset.id = identification
-
+  todoBody.dataset.id = id
   directions = content.length > 0 ? content : ``
 
   todoTemplate = `
@@ -101,9 +102,10 @@ let clearForm = node => {
   inputs.forEach(i => (i.value = ''))
 }
 
-let replaceForm = (title, content) => {
-  let titleToReplace = document.querySelector('.todo-title--editable')
-  let contentToReplace = document.querySelector('.todo-content--editable')
+let replaceForm = (id, title, content) => {
+  let baseNode = document.querySelector(`[data-id='${id}']`)
+  let titleToReplace = baseNode.querySelector('.todo-title--editable')
+  let contentToReplace = baseNode.querySelector('.todo-content--editable')
   let todoTitle = document.createElement('span')
   todoTitle.classList.add('list-todos__title')
   todoTitle.innerHTML = `${title}`
@@ -113,11 +115,7 @@ let replaceForm = (title, content) => {
   }
 }
 
-let IDTEST
-let getID = item => {
-  console.log(item.closest('li').dataset.id)
-  return item.closest('li').dataset.id
-}
+let getID = item => item.closest('li').dataset.id
 
 let updateDB = identification => {
   let listItem = document.querySelector(`[data-id='${identification}']`)
@@ -132,24 +130,29 @@ let updateDB = identification => {
   if (editableTitles.length > 1) {
     console.log('ISSUE')
   }
-  fetchItem(
-    `/todos/${id}`,
-    {
-      id,
-      title,
-      content
-    },
-    'PUT'
-  ).then(() => {
-    // separate the replacing of items to a new function to be called here on submission, and on close
-    // it should update on form submission* or closing of todo// OR // just update when closed and make ENTER close the todo// THE SECOND OPTION IS FAVORABLE
-  })
-  replaceForm(title, content)
+
+  fetchItem(`/todos/${id}`, { id, title, content }, 'PUT')
+
+  replaceForm(id, title, content)
+}
+
+function moveCursorToEnd(el) {
+  if (typeof el.selectionStart == 'number') {
+    el.selectionStart = el.selectionEnd = el.value.length
+    el.focus()
+  } else if (typeof el.createTextRange != 'undefined') {
+    el.focus()
+    var range = el.createTextRange()
+    range.collapse(false)
+    range.select()
+  }
 }
 
 let editableInputs = target => {
-  let title = target.querySelector('.list-todos__title')
-  let content = target.querySelector('.list-todos__content p')
+  let openedItem = document.querySelector('[data-state="open"]')
+  console.log(openedItem)
+  let title = openedItem.querySelector('.list-todos__title')
+  let content = openedItem.querySelector('.list-todos__content p')
   let titleText = title.textContent
   let contentText = content.textContent
 
@@ -159,8 +162,8 @@ let editableInputs = target => {
   titleItem = `
     <form method="POST" class="todo-title--editable">
       <label for="todo-title" class="screenreader-only">Title</label>
-      <input type="text" id="todo-title--update" name="Todo Entry" value="${titleText.trim()}">
-      <button class="screenreader-only"type="submit">update</button>
+      <input type="text" id="todo-title--update" name="Todo Entry" autocomplete="off" value="${titleText.trim()}">
+      <button class="screenreader-only" type="submit" tabindex="-1">update</button>
     </form>
   `
 
@@ -168,13 +171,16 @@ let editableInputs = target => {
   contentItem = `
     <form method="POST" class="todo-content--editable">
       <label for="todo-content" class="screenreader-only">Description</label>
-      <input type="text" id="todo-content--update" name="Todo Description Entry" value="${contentText.trim()}">
-      <button class="screenreader-only">update</button>
+      <input type="text" id="todo-content--update" autocomplete="off" name="Todo Description Entry" value="${contentText.trim()}">
+      <button class="screenreader-only" tabindex="-1">update</button>
     </form>
   `
 
   title.innerHTML = titleItem
   content.innerHTML = contentItem
+
+  let focusedInput = openedItem.querySelector('#todo-title--update')
+  moveCursorToEnd(focusedInput)
 }
 
 let newTodo = document.querySelector('.todo-new')
@@ -202,8 +208,6 @@ let showTodoForm = () => {
 
 newTodo.addEventListener('click', showTodoForm)
 
-const details = document.querySelectorAll('details')
-
 let ariaDetails = e => {
   e.preventDefault()
   const detailPar = e.currentTarget
@@ -213,50 +217,16 @@ let ariaDetails = e => {
     : detailPar.setAttribute('aria-expanded', 'false')
 }
 
-// let closeAll = evt => {
-//   details.forEach(item => {
-//     let itemID = item.closest('li').dataset.id
-//     let evtID = evt.currentTarget.closest('li').dataset.id
-
-//     if (itemID !== evtID && item.open) {
-//       // technically both are alike...
-//       closeDetail(evt)
-//     }
-//   })
-// }
-
-// separate updating functionality to three functions
-// 1. Set 1
-// - open detail
-//   - make title and content into forms
-// 2.
-//    Close input (e) 👇
-//   - normal text
-//   - dbUpdatedText
-
 let detailClick = e => {
-  if (e.currentTarget.dataset.state === 'open') {
-    closeDetail(e.currentTarget)
-    console.log('if 🏃')
-  } else {
-    openDetail(e)
-
-    editableInputs(e.currentTarget)
-  }
-
-  // ariaDetails(e)
+  e.currentTarget.dataset.state === 'open'
+    ? closeDetail(e.currentTarget)
+    : (openDetail(e), editableInputs(e.currentTarget))
 }
 
 let openDetail = e => {
   let openedItem = document.querySelector('[data-state="open"]')
 
-  if (openedItem) {
-    closeDetail(openedItem)
-    // openedItem.open = false
-    // openedItem.dataset.state = 'closed'
-  } else {
-    console.log('no opened item')
-  }
+  if (openedItem) closeDetail(openedItem)
   e.currentTarget.dataset.state = 'open'
   e.currentTarget.open = true
 }
@@ -266,22 +236,39 @@ let closeDetail = item => {
   updateDB(getID(item))
   item.open = false
   item.dataset.state = 'closed'
-  // issue 👇
-  // updateDB(getID(evt))
-  // needs to run just before an item is closed as CLOSEDETAIL updates based on the evt param on the newly clicked detail
+
   item.setAttribute('aria-expanded', 'false')
 }
 
 let triggerDetail = e => {
-  // getID(e)
-  // closeAll(e)
   detailClick(e)
+}
+
+let statusChange = e => {
+  e.stopPropagation()
+  let id = e.currentTarget.closest('li').dataset.id
+  let status = e.currentTarget.hasAttribute('checked') ? false : true
+
+  status
+    ? e.currentTarget.removeAttribute('checked')
+    : e.currentTarget.setAttribute('checked', ``)
+
+  e.currentTarget
+    .closest('li')
+    .querySelector('.list-todos__title')
+    .classList.toggle('--strike')
+
+  fetchItem(`/todos/${id}`, { id, status }, 'PUT')
 }
 
 details.forEach(item => {
   item.addEventListener('click', e => e.preventDefault())
-  item.addEventListener('dblclick', triggerDetail)
+  item.addEventListener('dblclick', e => triggerDetail(e))
+  item.querySelector('[type="checkbox"]').addEventListener('click', statusChange)
 })
 
 todoForm.addEventListener('submit', addThis)
 deleteButtons.forEach(i => i.addEventListener('click', deleteThis))
+
+//TODO:
+// Need to test whether content on open AND close are the same, if so then don't update the DB.

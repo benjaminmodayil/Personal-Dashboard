@@ -21,6 +21,17 @@ var app = express()
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'hbs')
+
+function uniqArr(arr) {
+  const trArr = arr.filter(e => {
+    if (e.tag.trim() !== undefined || e.tag.trim() !== '') {
+      return e.tag
+    }
+  })
+  const vArr = trArr.map(e => e.tag)
+  return arr.filter((_, i) => vArr.indexOf(vArr[i]) === i)
+}
+
 hbs.localsAsTemplateData(app)
 
 // uncomment after placing your favicon in /public
@@ -92,6 +103,7 @@ app.get('/', (req, res) => {
     .then(items => {
       collector.todos = items
       app.locals.todos = () => items
+      app.locals.tags = () => uniqArr(items)
       console.log('finding todos')
       return items
     })

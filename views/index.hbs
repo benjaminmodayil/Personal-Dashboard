@@ -9,45 +9,57 @@
 
     <form method="POST" class="todo-form">
       <label class="block screenreader-only" for="todo-title">Title</label>
-      <input class="block" type="text" id="todo-title" name="Todo Entry" value="Title" placeholder="What do you want todo?" required
+      <input class="block" type="text" id="todo-title" name="Todo Entry" value="Title" placeholder="What do you want todo?" required autocomplete="off"
         aria-required="true">
       <label class="block screenreader-only" for="todo-description">Description</label>
       <textarea class="block" type="text" id="todo-description" name="Todo description" placeholder="Any details?"></textarea>
       <label class="block screenreader-only" for="todo-tag">Tag</label>
-      <select id="todo-tag" class="screenreader-only">
+      <select id="todo-tag">
         <option value="volvo">Volvo</option>
         <option value="saab">Saab</option>
         <option value="mercedes">Mercedes</option>
         <option value="audi">Audi</option>
       </select>
       <label class="block screenreader-only" for="todo-due-date">Due Date</label>
-      <input class="block screenreader-only" type="date" id="todo-due-date" name="Todo Entry" placeholder="What do you want todo?">
+      <input class="block" type="date" id="todo-due-date" name="Todo Entry" placeholder="What do you want todo?">
       <button class="screenreader-only">todo +</button>
     </form>
   </div>
 
-  <ul class="list-todos">
-    {{#each todos}}
-    <li class="row list-item" data-id="{{_id}}" draggable="false">
-      <details data-state="closed">
-        <summary>
-          <input type="checkbox">
-          <span class="list-todos__title font-sans m-left-16">{{title}}</span>
-        </summary>
-        <div class="list-todos__content clearfix">
-          <p class="p-left-32 font-serif f-s-14">
-            {{#if content}} {{content}} {{else}}
-            <span class="italic">Add a description here.</span> {{/if}}
-          </p>
+  <div class="todos-and-tags">
+    <ul class="list-todos">
+      {{#each todos}}
+      <li class="row list-item" data-id="{{_id}}" draggable="false" tabindex="0">
+        <details data-state="closed">
+          <summary>
+            <input type="checkbox" {{#if status}} checked {{else}} {{/if}}>
+            <span class="list-todos__title font-sans m-left-16 {{#if status}} --strike 
+ {{else}} {{/if}}">{{title}}</span>
+          </summary>
+          <div class="list-todos__content clearfix">
+            <p class="p-left-32 font-serif f-s-14">
+              {{#if content}} {{content}} {{else}}
+              <span class="italic">Add a description here.</span> {{/if}}
+            </p>
 
-          <div class="todos__hidden-controls float-right">
-            <button class="list-todos__delete">❌</button>
-            <button class="list-todos__tags">🏷️</button>
-            <button class="list-todos__date">📆</button>
+            <div class="todos__hidden-controls float-right">
+              <button class="list-todos__delete">❌</button>
+              <button class="list-todos__tags">🏷️</button>
+              <button class="list-todos__date">📆</button>
+            </div>
           </div>
-        </div>
-      </details>
-    </li>
-    {{/each}}
-  </ul>
+        </details>
+      </li>
+      {{/each}}
+    </ul>
+
+    <aside>
+      <h2 class="screenreader-only">Tags</h2>
+      <ul>
+        {{#each @tags}}
+        <li class="f-s-14 font-sans font-bold m-bottom-24">{{tag}}</li>
+        {{/each}}
+      </ul>
+    </aside>
+  </div>
 </div>
